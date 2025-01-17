@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View, Alert, Image, Text } from 'react-native';
 import OutlinedButton from '../UI/OutlinedButton';
 import { Colors } from '../../constants/colors';
@@ -8,12 +8,31 @@ import {
 	PermissionStatus,
 } from 'expo-location';
 import { getMapPreview } from '../../util/location';
+import {
+	useNavigation,
+	useRoute,
+	useIsFocused,
+} from '@react-navigation/native';
 
 function LocationPicker() {
+	const isFocused = useIsFocused();
+	const navigation = useNavigation();
 	const [pickedLocation, setPickedLocation] = useState(); // To keep tack of tracing location
+	const route = useRoute();
 
 	const [locationPermissionInformation, requestPermission] =
 		useForegroundPermissions();
+
+	//Conditionally update location state with receiving route params from Map Screen
+	useEffect(() => {
+		if (isFocused && route.params) {
+			const mapPickedLocation = {
+				latitude: route.params.pickedLatitude,
+				longitude: route.params.pickedLongitude,
+			};
+			setPickedLocation(mapPickedLocation);
+		}
+	}, [route, isFocused]);
 
 	async function verifyPermissions() {
 		//Check permissions to access device location
@@ -51,20 +70,22 @@ function LocationPicker() {
 		//Fetch current geo-location
 		const location = await getCurrentPositionAsync();
 		setPickedLocation({
-			lon: location.coords.longitude,
-			lat: location.coords.latitude,
+			longitude: location.coords.longitude,
+			latitude: location.coords.latitude,
 		});
 	}
 
-	function pickOnMapHandler() {}
+	function pickOnMapHandler() {
+		navigation.navigate('Map');
+	}
 
 	//Fallback Text
 	let locationPreview = <Text>No location picked yet.</Text>;
 
 	if (pickedLocation) {
 		let staticMapImageUrl = getMapPreview(
-			pickedLocation.lon,
-			pickedLocation.lat
+			pickedLocation.longitude,
+			pickedLocation.latitude
 		);
 
 		locationPreview = (
