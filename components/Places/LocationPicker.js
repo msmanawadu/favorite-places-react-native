@@ -7,14 +7,14 @@ import {
 	useForegroundPermissions,
 	PermissionStatus,
 } from 'expo-location';
-import { getMapPreview } from '../../util/location';
+import { getMapPreview, getAddress } from '../../util/location';
 import {
 	useNavigation,
 	useRoute,
 	useIsFocused,
 } from '@react-navigation/native';
 
-function LocationPicker() {
+function LocationPicker({ onPickLocation }) {
 	const isFocused = useIsFocused();
 	const navigation = useNavigation();
 	const [pickedLocation, setPickedLocation] = useState(); // To keep tack of tracing location
@@ -23,7 +23,7 @@ function LocationPicker() {
 	const [locationPermissionInformation, requestPermission] =
 		useForegroundPermissions();
 
-	//Conditionally update location state with receiving route params from Map Screen
+	//Conditionally update location state with receiving route params from Map Screen -> For 'Pick on Map' button
 	useEffect(() => {
 		if (isFocused && route.params) {
 			const mapPickedLocation = {
@@ -33,6 +33,20 @@ function LocationPicker() {
 			setPickedLocation(mapPickedLocation);
 		}
 	}, [route, isFocused]);
+
+	//To call 'onPickLocation' whenever pickedLocation state changes
+	useEffect(() => {
+		async function handleLocation() {
+			if (pickedLocation) {
+				const address = await getAddress(
+					pickedLocation.longitude,
+					pickedLocation.latitude
+				);
+				onPickLocation({ ...pickedLocation, address: address });
+			}
+		}
+		handleLocation();
+	}, [pickedLocation, onPickLocation]);
 
 	async function verifyPermissions() {
 		//Check permissions to access device location
@@ -67,7 +81,7 @@ function LocationPicker() {
 			return; //Permission denied, skip further execution
 		}
 
-		//Fetch current geo-location
+		//Fetch current geo-location -> For 'Locate User' button
 		const location = await getCurrentPositionAsync();
 		setPickedLocation({
 			longitude: location.coords.longitude,
