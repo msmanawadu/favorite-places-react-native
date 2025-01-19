@@ -90,7 +90,7 @@ function LocationPicker({ onPickLocation }) {
 	}
 
 	function pickOnMapHandler() {
-		navigation.navigate('Map');
+		navigation.push('Map');
 	}
 
 	//Fallback Text
