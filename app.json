@@ -37,7 +37,8 @@
 					"locationAlwaysAndWhenInUsePermission": "The app needs access to your location in order to geo-locate your favorite places."
 				}
 			],
-			["expo-sqlite"]
+			["expo-sqlite"],
+			["expo-splash-screen"]
 		]
 	}
 }
