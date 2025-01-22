@@ -51,6 +51,7 @@ export async function fetchPlaceDetails(id) {
 		'SELECT * FROM places WHERE id = ?',
 		[id]
 	);
+	// Transform query result into a place object
 	const place = new Place(
 		dbPlace.title,
 		dbPlace.imageUri,
